@@ -163,6 +163,8 @@ use pocketmine\permission\PermissionAttachment;
 use pocketmine\permission\PermissionAttachmentInfo;
 use pocketmine\permission\PermissionManager;
 use pocketmine\plugin\Plugin;
+use pocketmine\network\mcpe\protocol\SetAcrtorLinkPacket;
+use pocketmine\network\mcpe\protocol\types\EntityLink;
 use pocketmine\resourcepacks\ResourcePack;
 use pocketmine\tile\ItemFrame;
 use pocketmine\tile\Spawnable;
@@ -1342,7 +1344,20 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		];
 		return $map[$gamemode & 0x3];
 	}
+	
+	/**
+	* links a player to a entity note: some times if a other player(or players) are has a unloaded chunk between them the link wont show right for it pls link player every 10 - 20 second
+	*
+	* @param Entity $toEntity
+	*/
 
+	public function link(Entity $toEntity){
+	   $pk = new SetActorLinkPacket();
+	   $pk->link = new EntityLink($toEntity->getId(), $player->getId(), EntityLink::TYPE_PASSENGER, true, true);
+		foreach (Server::getInstance()->getOnlinePlayers() as $players){
+			$players->sendDataPacket($pk);
+		}
+	}
 	/**
 	 * Sets the gamemode, and if needed, kicks the Player.
 	 *
